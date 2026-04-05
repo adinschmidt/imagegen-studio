@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "dev": "deno run -A npm:next dev --turbopack",
+    "build": "deno run -A npm:next build",
+    "start": "deno run -A npm:next start",
+    "lint": "deno run -A npm:next lint"
+  },
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
+}
