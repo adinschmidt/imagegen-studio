@@ -28,6 +28,7 @@ export interface ProviderDef {
   id: ProviderId;
   name: string;
   icon: string;
+  logoDomain?: string; // domain for logo.dev (e.g. "openai.com")
   defaultBaseUrl: string;
   models: ModelDef[];
 }

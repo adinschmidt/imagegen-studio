@@ -9,6 +9,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
     id: "openai",
     name: "OpenAI",
     icon: "✦",
+    logoDomain: "openai.com",
     defaultBaseUrl: "https://api.openai.com",
     models: [
       {
@@ -48,6 +49,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
     id: "google",
     name: "Google",
     icon: "◈",
+    logoDomain: "google.com",
     defaultBaseUrl: "https://generativelanguage.googleapis.com",
     models: [
       {
@@ -131,6 +133,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
     id: "grok",
     name: "Grok (xAI)",
     icon: "𝕏",
+    logoDomain: "x.ai",
     defaultBaseUrl: "https://api.x.ai",
     models: [
       {
@@ -158,6 +161,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
     id: "openrouter",
     name: "OpenRouter",
     icon: "⬡",
+    logoDomain: "openrouter.ai",
     defaultBaseUrl: "https://openrouter.ai/api",
     models: [
       /* ── Google Gemini image models ─────────────────────── */

@@ -29,6 +29,7 @@ import {
   EyeOff,
   Settings2,
 } from "lucide-react";
+import { ProviderLogo } from "@/components/provider-logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -116,7 +117,13 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
               <SelectLabel>Providers</SelectLabel>
               {Object.values(PROVIDERS).map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  <span className="mr-2">{p.icon}</span>
+                  <ProviderLogo
+                    domain={p.logoDomain}
+                    fallbackIcon={p.icon}
+                    name={p.name}
+                    size={16}
+                    className="mr-2"
+                  />
                   {p.name}
                 </SelectItem>
               ))}
