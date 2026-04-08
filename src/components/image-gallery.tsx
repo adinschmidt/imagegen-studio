@@ -2,6 +2,8 @@
 
 import { ImageIcon, Trash2, Download, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProviderLogo } from "@/components/provider-logo";
+import { PROVIDERS } from "@/lib/providers";
 import type { StoredImage } from "@/lib/types";
 
 interface ImageGalleryProps {
@@ -77,6 +79,21 @@ export function ImageGallery({
               alt={image.prompt}
               className="h-full w-full object-cover transition-transform group-hover:scale-105"
             />
+
+            {/* Provider icon badge */}
+            {(() => {
+              const prov = PROVIDERS[image.provider];
+              return prov ? (
+                <div className="absolute bottom-1 right-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 shadow-sm">
+                  <ProviderLogo
+                    domain={prov.logoDomain}
+                    fallbackIcon={prov.icon}
+                    name={prov.name}
+                    size={12}
+                  />
+                </div>
+              ) : null;
+            })()}
 
             {/* Hover overlay with actions */}
             <div className="absolute inset-0 flex flex-col justify-between bg-black/0 group-hover:bg-black/50 transition-colors pointer-events-none group-hover:pointer-events-auto">
