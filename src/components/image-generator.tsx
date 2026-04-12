@@ -151,6 +151,7 @@ export function ImageGenerator() {
             <SettingsPanel
               settings={settings}
               onChange={handleSettingsChange}
+              referenceImage={referenceImages[0]}
             />
           </div>
 

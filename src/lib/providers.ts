@@ -316,6 +316,16 @@ const GPT_IMAGE_SIZES: Record<AspectRatio, string> = {
   "3:4": "1024x1536",
 };
 
+const ASPECT_RATIO_VALUES: Record<AspectRatio, number> = {
+  "1:1": 1,
+  "16:9": 16 / 9,
+  "9:16": 9 / 16,
+  "4:3": 4 / 3,
+  "3:4": 3 / 4,
+  "3:2": 3 / 2,
+  "2:3": 2 / 3,
+};
+
 const OPENAI_SIZE_MAP: Record<string, Record<AspectRatio, string>> = {
   "gpt-image-1.5": GPT_IMAGE_SIZES,
   "gpt-image-1": GPT_IMAGE_SIZES,
@@ -356,4 +366,30 @@ export function getModelDef(
   modelId: string,
 ): ModelDef | undefined {
   return PROVIDERS[providerId]?.models.find((m) => m.id === modelId);
+}
+
+export function getClosestAspectRatio(
+  width: number,
+  height: number,
+  supportedAspectRatios: AspectRatio[],
+): AspectRatio | null {
+  if (width <= 0 || height <= 0 || supportedAspectRatios.length === 0) {
+    return null;
+  }
+
+  const imageRatio = width / height;
+  let bestMatch = supportedAspectRatios[0];
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const aspectRatio of supportedAspectRatios) {
+    const candidateRatio = ASPECT_RATIO_VALUES[aspectRatio];
+    const distance = Math.abs(Math.log(imageRatio / candidateRatio));
+
+    if (distance < bestDistance) {
+      bestMatch = aspectRatio;
+      bestDistance = distance;
+    }
+  }
+
+  return bestMatch;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   AppSettings,
   AspectRatio,
@@ -9,7 +9,7 @@ import type {
   Resolution,
 } from "@/lib/types";
 import { ASPECT_RATIO_LABELS, QUALITY_LABELS, RESOLUTION_LABELS } from "@/lib/types";
-import { PROVIDERS, getModelDef } from "@/lib/providers";
+import { PROVIDERS, getClosestAspectRatio, getModelDef } from "@/lib/providers";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -30,17 +30,28 @@ import {
   Settings2,
 } from "lucide-react";
 import { ProviderLogo } from "@/components/provider-logo";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface SettingsPanelProps {
   settings: AppSettings;
   onChange: (settings: AppSettings) => void;
+  referenceImage?: string;
 }
 
-export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
+export function SettingsPanel({
+  settings,
+  onChange,
+  referenceImage,
+}: SettingsPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [suggestedAspectRatio, setSuggestedAspectRatio] = useState<AspectRatio | null>(null);
+  const lastAutoAppliedRef = useRef<{
+    provider: ProviderId;
+    model: string;
+    referenceImage: string;
+    suggestedAspectRatio: AspectRatio;
+  } | null>(null);
 
   const providerDef = PROVIDERS[settings.provider];
   const modelDef = getModelDef(settings.provider, settings.model);
@@ -97,6 +108,78 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
     () => modelDef?.supportedResolutions ?? undefined,
     [modelDef],
   );
+
+  useEffect(() => {
+    if (!referenceImage) {
+      setSuggestedAspectRatio(null);
+      return;
+    }
+
+    let isCancelled = false;
+    const image = new Image();
+
+    image.onload = () => {
+      if (isCancelled) return;
+
+      setSuggestedAspectRatio(
+        getClosestAspectRatio(
+          image.naturalWidth,
+          image.naturalHeight,
+          supportedAspectRatios,
+        ),
+      );
+    };
+
+    image.onerror = () => {
+      if (!isCancelled) {
+        setSuggestedAspectRatio(null);
+      }
+    };
+
+    image.src = referenceImage;
+
+    return () => {
+      isCancelled = true;
+      image.onload = null;
+      image.onerror = null;
+    };
+  }, [referenceImage, supportedAspectRatios]);
+
+  useEffect(() => {
+    if (!referenceImage || !suggestedAspectRatio) {
+      lastAutoAppliedRef.current = null;
+      return;
+    }
+
+    const lastAutoApplied = lastAutoAppliedRef.current;
+    if (
+      lastAutoApplied &&
+      lastAutoApplied.provider === settings.provider &&
+      lastAutoApplied.model === settings.model &&
+      lastAutoApplied.referenceImage === referenceImage &&
+      lastAutoApplied.suggestedAspectRatio === suggestedAspectRatio
+    ) {
+      return;
+    }
+
+    lastAutoAppliedRef.current = {
+      provider: settings.provider,
+      model: settings.model,
+      referenceImage,
+      suggestedAspectRatio,
+    };
+
+    if (settings.aspectRatio !== suggestedAspectRatio) {
+      update({ aspectRatio: suggestedAspectRatio });
+    }
+  }, [
+    referenceImage,
+    settings.provider,
+    settings.model,
+    settings.aspectRatio,
+    suggestedAspectRatio,
+    update,
+  ]);
 
   const currentApiKey = settings.apiKeys[settings.provider] ?? "";
 
@@ -188,6 +271,11 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
             ))}
           </SelectContent>
         </Select>
+        {suggestedAspectRatio && (
+          <p className="text-xs text-[var(--muted-foreground)]">
+            Suggested based on input image: {ASPECT_RATIO_LABELS[suggestedAspectRatio]}
+          </p>
+        )}
       </div>
 
       {/* ── Quality (if supported) ───────────────────────────── */}
